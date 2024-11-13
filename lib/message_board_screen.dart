@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'chat_screen.dart'; 
+import 'chat_screen.dart';
+
 class MessageBoardScreen extends StatelessWidget {
   final List<Map<String, String>> messageBoards = [
-    {'title': 'General Chat', 'icon': 'assets/general_icon.png'},
-    {'title': 'Announcements', 'icon': 'assets/announcement_icon.png'},
-    {'title': 'Study Group', 'icon': 'assets/study_icon.png'},
-    {'title': 'Events', 'icon': 'assets/events_icon.png'},
+    {'title': 'General Chat', 'icon': 'assets/general_chat.png'},
+    {'title': 'Announcements', 'icon': 'assets/announcement.png'},
+    {'title': 'Study Group', 'icon': 'assets/studygroup.png'},
+    {'title': 'Events', 'icon': 'assets/events.png'},
   ];
 
   @override
@@ -26,13 +27,11 @@ class MessageBoardScreen extends StatelessWidget {
             ),
             title: Text(messageBoards[index]['title']!),
             onTap: () {
-              Navigator.push(
+              // Navigating to ChatScreen with the board name as an argument
+              Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => ChatScreen(
-                    boardName: messageBoards[index]['title']!,
-                  ),
-                ),
+                '/chat',
+                arguments: messageBoards[index]['title']!,
               );
             },
           );
