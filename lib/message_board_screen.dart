@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'chat_screen.dart'; 
 class MessageBoardScreen extends StatelessWidget {
   final List<Map<String, String>> messageBoards = [
     {'title': 'General Chat', 'icon': 'assets/general_icon.png'},
