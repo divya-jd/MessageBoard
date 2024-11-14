@@ -1,4 +1,3 @@
-// splash_screen.dart
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -9,8 +8,19 @@ class SplashScreen extends StatelessWidget {
     });
 
     return Scaffold(
+      backgroundColor: Colors.blue, // Set a background color for your splash screen
       body: Center(
-        child: FlutterLogo(size: 100), // Customize logo or image
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FlutterLogo(size: 100), // Customize your logo or replace it with an image
+            SizedBox(height: 20),
+            Text(
+              'Welcome to MyApp',
+              style: TextStyle(fontSize: 24, color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }

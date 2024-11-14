@@ -27,8 +27,25 @@ class _LoginScreenState extends State<LoginScreen> {
       // Navigate to the home page or main app screen after successful login
       Navigator.pushReplacementNamed(context, '/home');
     } catch (error) {
+      String errorMessage = 'An error occurred. Please try again.';
+      if (error is FirebaseAuthException) {
+        // Specific FirebaseAuthException handling
+        switch (error.code) {
+          case 'user-not-found':
+            errorMessage = 'No user found for that email.';
+            break;
+          case 'wrong-password':
+            errorMessage = 'Incorrect password.';
+            break;
+          case 'invalid-email':
+            errorMessage = 'The email address is not valid.';
+            break;
+          default:
+            errorMessage = 'An unknown error occurred. Please try again.';
+        }
+      }
       setState(() {
-        _errorMessage = error.toString(); // Display the error message
+        _errorMessage = errorMessage; // Display the error message
       });
     } finally {
       setState(() {

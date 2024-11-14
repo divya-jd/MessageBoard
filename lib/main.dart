@@ -16,15 +16,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Your App Name',
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegistrationScreen(),
         '/messageBoards': (context) => MessageBoardScreen(),
-        '/chat': (context) => ChatScreen(
-          boardName: ModalRoute.of(context)!.settings.arguments as String,
-        ),
+        // Handling the route for ChatScreen with arguments
+        '/chat': (context) {
+          final String boardName = ModalRoute.of(context)!.settings.arguments as String;
+          return ChatScreen(boardName: boardName);
+        },
       },
     );
   }

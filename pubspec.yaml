@@ -27,13 +27,21 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: any
-  firebase_auth: any
-  cloud_firestore: any
-  flutter_chat: ^2.0.3
+
+  firebase_core: ^2.15.0  # Use the version of firebase_core you want
+  firebase_auth: ^4.3.0  # Make sure firebase_auth is also compatible
+  cloud_firestore: ^4.17.5  # Downgrade to a compatible version of cloud_firestore
+  firebase_messaging: ^14.0.0  # Ensure the latest compatible version of firebase_messaging
+  firebase_storage: ^11.0.0  # Ensure the latest compatible version of firebase_storage
+
+
+
+  
+
 
 
 
