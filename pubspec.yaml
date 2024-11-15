@@ -32,11 +32,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  firebase_core: ^2.15.0  # Use the version of firebase_core you want
-  firebase_auth: ^4.3.0  # Make sure firebase_auth is also compatible
-  cloud_firestore: ^4.17.5  # Downgrade to a compatible version of cloud_firestore
-  firebase_messaging: ^14.0.0  # Ensure the latest compatible version of firebase_messaging
-  firebase_storage: ^11.0.0  # Ensure the latest compatible version of firebase_storage
+  firebase_core: any # Use the version of firebase_core you want
+  firebase_auth: any # Make sure firebase_auth is also compatible
+  cloud_firestore: any  # Downgrade to a compatible version of cloud_firestore
+  firebase_messaging: any # Ensure the latest compatible version of firebase_messaging
+  firebase_storage: any # Ensure the latest compatible version of firebase_storage
+  image_picker: ^0.8.7+3 
 
 
 
@@ -58,7 +59,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -77,6 +78,8 @@ flutter:
     - /Users/joisedivya/message_board_app/assets/events.png
     - /Users/joisedivya/message_board_app/assets/general_chat.png
     - /Users/joisedivya/message_board_app/assets/studygroup.png
+    - /Users/joisedivya/message_board_app/assets/logo.jpeg
+    - /Users/joisedivya/message_board_app/assets/profile_placeholder.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

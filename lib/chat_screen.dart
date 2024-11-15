@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String boardName;
-
+  final String boardName;  // The name of the message board
   ChatScreen({required this.boardName});
 
   @override
@@ -12,18 +10,21 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _messageController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> _sendMessage() async {
+  // Method to send a message to the selected board
+  void _sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      await _firestore.collection('message_boards').doc(widget.boardName).collection('messages').add({
-        'text': _messageController.text.trim(),
-        'sender': _auth.currentUser?.displayName ?? _auth.currentUser?.email,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      _messageController.clear();
+      await _firestore.collection('messageBoards')
+          .doc(widget.boardName)
+          .collection('messages')
+          .add({
+            'username': 'John Doe',  // This should be the current user's name
+            'message': _messageController.text,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
+      _messageController.clear();  // Clear the input field after sending
     }
   }
 
@@ -34,33 +35,45 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Text(widget.boardName),
       ),
       body: Column(
-        children: <Widget>[
+        children: [
+          // Messages list
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('message_boards')
+              stream: _firestore.collection('messageBoards')
                   .doc(widget.boardName)
                   .collection('messages')
                   .orderBy('timestamp', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No messages yet.'));
+                }
+
                 final messages = snapshot.data!.docs;
+
                 return ListView.builder(
-                  reverse: true,
+                  reverse: true,  // This ensures the most recent messages are at the bottom
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    var message = messages[index];
+                    final messageData = messages[index];
+                    final username = messageData['username'];
+                    final message = messageData['message'];
+                    final timestamp = messageData['timestamp']?.toDate();
+
                     return ListTile(
-                      title: Text(message['sender'] ?? 'Unknown'),
-                      subtitle: Text(message['text']),
+                      title: Text(username),
+                      subtitle: Text(message),
                       trailing: Text(
-                        message['timestamp'] != null
-                            ? (message['timestamp'] as Timestamp).toDate().toLocal().toString()
-                            : 'Sending...',
-                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                        timestamp != null ? '${timestamp.hour}:${timestamp.minute}' : '',
+                        style: TextStyle(fontSize: 12),
                       ),
                     );
                   },
@@ -68,15 +81,17 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
+          
+          // Message input area
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
-              children: <Widget>[
+              children: [
                 Expanded(
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: 'Enter your message...',
+                      labelText: 'Type a message',
                       border: OutlineInputBorder(),
                     ),
                   ),

@@ -9,38 +9,58 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+  
+  String? email, password, firstName, lastName, role;
+  bool _isLoading = false;  // Track loading state
 
-  Future<void> registerUser(String email, String password, String firstName, String lastName) async {
-    try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
-        'firstName': firstName,
-        'lastName': lastName,
-        'role': 'user',
-        'registrationDate': DateTime.now(),
+  void registerUser() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;  // Show loading indicator
       });
-      Navigator.pushReplacementNamed(context, '/login');  // Navigate to login after successful registration
-    } catch (e) {
-      print(e);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-    }
-  }
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    super.dispose();
+      try {
+        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+          email: email!,
+          password: password!,
+        );
+
+        await _firestore.collection('users').doc(userCredential.user!.uid).set({
+          'firstName': firstName,
+          'lastName': lastName,
+          'role': role,
+          'registrationDateTime': DateTime.now(),
+          'uid': userCredential.user!.uid,
+        });
+
+        setState(() {
+          _isLoading = false;  // Hide loading indicator
+        });
+
+        Navigator.pushReplacementNamed(context, '/login');
+      } catch (e) {
+        setState(() {
+          _isLoading = false;  // Hide loading indicator in case of error
+        });
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Error"),
+              content: Text(e.toString()),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   @override
@@ -51,34 +71,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: ListView(
             children: [
               TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: 'Password'),
-                validator: (value) {
-                  if (value == null || value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _firstNameController,
                 decoration: InputDecoration(labelText: 'First Name'),
+                onChanged: (value) => firstName = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your first name';
@@ -87,8 +84,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 },
               ),
               TextFormField(
-                controller: _lastNameController,
                 decoration: InputDecoration(labelText: 'Last Name'),
+                onChanged: (value) => lastName = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your last name';
@@ -96,20 +93,45 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    registerUser(
-                      _emailController.text.trim(),
-                      _passwordController.text.trim(),
-                      _firstNameController.text.trim(),
-                      _lastNameController.text.trim(),
-                    );
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Role'),
+                onChanged: (value) => role = value,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your role';
                   }
+                  return null;
                 },
-                child: Text('Register'),
               ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Email'),
+                onChanged: (value) => email = value,
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty || !value.contains('@')) {
+                    return 'Please enter a valid email';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                onChanged: (value) => password = value,
+                validator: (value) {
+                  if (value == null || value.isEmpty || value.length < 6) {
+                    return 'Password must be at least 6 characters long';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: registerUser,
+                      child: Text('Register'),
+                    ),
             ],
           ),
         ),
